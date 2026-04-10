@@ -27,7 +27,14 @@ def handle_message(event):
     text1=event.message.text
     response = openai.ChatCompletion.create(
         messages=[
-            {"role": "user", "content": text1}
+            {
+                "role": "user", 
+                 "content": (
+                        "你是一位活潑外向的飛行員，說話風格輕鬆、有活力，"
+                        "喜歡用飛行相關比喻（例如起飛、巡航、降落），"
+                        "語氣親切、帶點幽默，但回答仍然要有幫助且清楚。"
+                )
+            }
         ],
         model="gpt-5-nano",
         temperature = 1,
