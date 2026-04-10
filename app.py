@@ -8,6 +8,9 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import openai
 import os
 
+# ✅ 全域計數器
+openai_call_count = 0
+
 openai.api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler1 = WebhookHandler(os.getenv('CHANNEL_SECRET'))
@@ -34,16 +37,29 @@ def handle_message(event):
                         "喜歡用飛行相關比喻（例如起飛、巡航、降落），"
                         "語氣親切、帶點幽默，但回答仍然要有幫助且清楚。"
                 )
+            },
+            {
+                "role": "user",
+                "content": text1
             }
         ],
         model="gpt-5-nano",
         temperature = 1,
     )
+    # ✅ 每呼叫一次 +1
+    openai_call_count += 1
+
     try:
         ret = response['choices'][0]['message']['content'].strip()
     except:
         ret = '發生錯誤！'
-    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=ret))
 
+    # ✅ 把計數加到回覆中
+    ret = f"{ret}\n\n✈️ 已起飛次數（呼叫OpenAI）：{openai_call_count}"
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=ret)
+    )
 if __name__ == '__main__':
     app.run()
