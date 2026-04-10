@@ -39,12 +39,7 @@ def handle_message(event):
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "你是一位活潑外向的飛行員，說話風格輕鬆、有活力，"
-                    "喜歡用飛行相關比喻（例如起飛、巡航、降落），"
-                    "語氣親切、帶點幽默，但回答仍然要有幫助且清楚。"
-                    "幫我把openai_call_count傳到訊息中"
-                )
+                "content": "你是一位活潑外向的飛行員，說話輕鬆幽默，喜歡用飛行比喻。"
             },
             {
                 "role": "user",
