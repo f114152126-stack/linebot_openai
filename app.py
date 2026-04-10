@@ -2,18 +2,19 @@ from flask import Flask
 app = Flask(__name__)
 
 from flask import request, abort
-from linebot import  LineBotApi, WebhookHandler
+from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import openai
 import os
 
-# ✅ 全域計數器
-openai_call_count = 0
-
 openai.api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler1 = WebhookHandler(os.getenv('CHANNEL_SECRET'))
+
+# ✅ 全域計數器
+openai_call_count = 0
+
 
 @app.route('/callback', methods=['POST'])
 def callback():
@@ -25,27 +26,28 @@ def callback():
         abort(400)
     return 'OK'
 
+
 @handler1.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    text1=event.message.text
+    global openai_call_count  # ← 要宣告 global
+
+    text1 = event.message.text
+
     response = openai.ChatCompletion.create(
+        model="gpt-5-nano",
+        temperature=1,
         messages=[
             {
-                "role": "user", 
-                 "content": (
-                        "你是一位活潑外向的飛行員，說話風格輕鬆、有活力，"
-                        "喜歡用飛行相關比喻（例如起飛、巡航、降落），"
-                        "語氣親切、帶點幽默，但回答仍然要有幫助且清楚。"
-                )
+                "role": "system",
+                "content": "你是一位活潑外向的飛行員，說話輕鬆幽默，喜歡用飛行比喻。"
             },
             {
                 "role": "user",
                 "content": text1
             }
-        ],
-        model="gpt-5-nano",
-        temperature = 1,
+        ]
     )
+
     # ✅ 每呼叫一次 +1
     openai_call_count += 1
 
@@ -61,5 +63,7 @@ def handle_message(event):
         event.reply_token,
         TextSendMessage(text=ret)
     )
+
+
 if __name__ == '__main__':
     app.run()
